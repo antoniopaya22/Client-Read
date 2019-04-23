@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+      <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+    <ion-title>Filtrar Datos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-grid [ngStyle]="{'display':submitted?'none':''}">
+    <ion-row>
+      <div class="card card-chart">
+            <div class="card-header card-header-orange">
+                <h4 class="card-title">Buscar por</h4>
+            </div>
+            <div class="card-body">
+                <form [formGroup]="filter" (ngSubmit)="search()">
+                  <div class="row">
+                    <div class="col-md-6 col-sm-12">
+                      <ion-item>
+                        <ion-label position="stacked">ID</ion-label>
+                        <input type="text" name="filterId" id="filterId" formControlName="filterId" class="form-control" placeholder="ID">
+                      </ion-item>
+                    </div>
+                  </div>
+                  <button class="btn btn-orange btn-round btn-block" expand="full" type="submit">Buscar</button>
+                </form>
+            </div>
+        </div>
+    </ion-row>
+  </ion-grid>
+
+  <div class="card" [ngStyle]="{'display':!submitted?'none':''}">
+      <div class="card-header card-header-orange">
+          <h4 class="card-title ">Resultados</h4>
+          <p class="card-category"> Resultados de los filtros</p>
+      </div>
+      <div class="card-body">
+          <div class="table-responsive">
+              <table mat-table [dataSource]="dataSource" class="table">
+                <!-- Position Column -->
+                <ng-container matColumnDef="Key">
+                  <th mat-header-cell *matHeaderCellDef class=" text-primary"> ID </th>
+                  <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="temp">
+                  <th mat-header-cell *matHeaderCellDef class=" text-primary"> Temperatura </th>
+                  <td mat-cell *matCellDef="let element"> {{element.temperature}} </td>
+                </ng-container>
+
+                <!-- Weight Column -->
+                <ng-container matColumnDef="device">
+                  <th mat-header-cell *matHeaderCellDef class=" text-primary"> Device </th>
+                  <td mat-cell *matCellDef="let element"> {{element.device}} </td>
+                </ng-container>
+
+                <!-- Symbol Column -->
+                <ng-container matColumnDef="gps">
+                  <th mat-header-cell *matHeaderCellDef class=" text-primary"> GPS </th>
+                  <td mat-cell *matCellDef="let element"> {{element.gps}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="time">
+                  <th mat-header-cell *matHeaderCellDef class=" text-primary"> Timestamp </th>
+                  <td mat-cell *matCellDef="let element"> {{element.hour}} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+          </div>
+      </div>
+  </div>
+  <div [ngStyle]="{'display':!submitted?'none':''}">
+    <mat-paginator [length]="100" [pageSize]="10" [pageSizeOptions]="[5, 10, 20]">
+    </mat-paginator>
+    <div class="back">
+      <button class="btn btn-orange btn-round btn-block" expand="full" type="submit" (click)="back()"> Atrás </button>
+    </div>
+  </div>
+</ion-content>

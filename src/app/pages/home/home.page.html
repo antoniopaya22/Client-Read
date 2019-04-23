@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Home
+    </ion-title>
+    <!--
+    <ion-buttons slot="secondary" *ngIf="!esMovil()">
+      <ion-input placeholder="Buscar..."></ion-input>
+      <ion-button>
+        <ion-icon slot="icon-only" name="search"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-grid>
+        <ion-row>
+          <ion-col size="12">
+              <div class="card card-chart">
+                  <div class="card-header card-header-orange">
+                      <div class="ct-chart" id="dailySalesChart"></div>
+                  </div>
+                  <div class="card-body">
+                      <h4 class="card-title">Temperatura del device</h4>
+                      <p class="card-category" *ngIf="sube">
+                          <span class="text-success" ><i class="fa fa-long-arrow-up"></i> {{subida}}% </span> de subida
+                      </p>
+                       <p class="card-category" *ngIf="!sube">
+                          <span class="text-danger"><i class="fa fa-long-arrow-down"></i> {{subida}}% </span> de bajada
+                      </p>
+                      
+                  </div>
+                  <div class="card-footer">
+                      <div class="stats">
+                          <i class="material-icons">update</i> Just Updated
+                      </div>
+                  </div>
+              </div>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+            <div class="card card-chart">
+                  <div class="card-header card-header-orange">
+                      <h4 class="card-title">Mapa de devices</h4>
+                  </div>
+                  <div class="card-body">
+                      <div id="map" class="map"></div>
+                  </div>
+              </div>
+         </ion-row>
+    </ion-grid>
+    <ion-footer>
+  <ion-toolbar>
+    © Copyright Antonio Payá González 2019
+  </ion-toolbar>
+</ion-footer>
+</ion-content>
