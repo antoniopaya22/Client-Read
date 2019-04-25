@@ -126,7 +126,7 @@ export class HomePage {
     loadData() {
         this.devicedata.getAllData().subscribe(res => {
             var dato = {};
-            var result = res as Array<T>;
+            var result = JSON.parse(res[0]);
             for (let i = 0; i < result.length; i++) {
                 var x = result[i];
                 if (dato[x.device] == undefined) dato[x.device] = x;
