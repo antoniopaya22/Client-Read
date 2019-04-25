@@ -124,10 +124,9 @@ export class HomePage {
     }
 
     loadData() {
-        this.devicedata.getAllData().subscribe(res => {
+        this.devicedata.getAllData().subscribe(result => {
             var dato = {};
-            var result = JSON.parse(res[0]);
-            for (let i = 0; i < result.length; i++) {
+            for (let i in Object.keys(result)) {
                 var x = result[i];
                 if (dato[x.device] == undefined) dato[x.device] = x;
                 else if (dato[x.device] != undefined && parseInt(x.id.match(/\d+/)[0]) > parseInt(dato[x.device].id.match(/\d+/)[0])) dato[x.device] = x;
