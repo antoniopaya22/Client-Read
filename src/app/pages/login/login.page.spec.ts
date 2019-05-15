@@ -33,7 +33,7 @@ describe('LoginPage', () => {
       providers: [
         { provide: StatusBar, useValue: statusBarSpy },
         { provide: SplashScreen, useValue: splashScreenSpy },
-        { provide: Platform, useValue: platformSpy },
+        { provide: Platform, useValue: platformSpy }
       ],
     }).compileComponents();
   }));
@@ -44,19 +44,20 @@ describe('LoginPage', () => {
     fixture.detectChanges();
   });
 
-  it('should create LoginPage', () => {
+  it('Crear componente', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render "username" in a input placeholder', async(() => {
+  it('Renderizar input usuario', async(() => {
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
     expect(compiled.querySelector('input').getAttribute('placeholder')).toContain('username');
   }));
 
-  it('should render "password" in a input placeholder', async(() => {
+  it('Renderizar input contraseña', async(() => {
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
     expect(compiled.querySelectorAll('input')[1].getAttribute('placeholder')).toContain('password');
   }));
+
 });

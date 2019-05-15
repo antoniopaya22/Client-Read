@@ -45,7 +45,7 @@ describe('HomePage', () => {
         fixture.detectChanges();
     });
 
-    it('should create the page', () => {
+    it('Crear componente', () => {
         expect(component).toBeTruthy();
     });
 

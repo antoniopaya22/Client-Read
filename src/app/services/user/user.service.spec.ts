@@ -22,12 +22,12 @@ describe('UserService', () => {
         });
       }));
 
-  it('should be created', () => {
+  it('Crear componente', () => {
     const service: UserService = TestBed.get(UserService);
     expect(service).toBeTruthy();
   });
 
-  it('should login', () => {
+  it('Iniciar sesion', () => {
     const service: UserService = TestBed.get(UserService);
     const data = {
         userName: 'user',
@@ -38,5 +38,25 @@ describe('UserService', () => {
     }, err => {
         fail(err);
     });
+  });
+
+  it('Cerrar sesion con sesion iniciada', () => {
+    const service: UserService = TestBed.get(UserService);
+    const data = {
+        userName: 'user',
+        password: 'user'
+    };
+    service.login(data).subscribe(res => {
+        service.removeToken();
+        expect(service.getToken() === null);
+    }, err => {
+        fail(err);
+    });
+  });
+
+  it('Cerrar sesion con sesion iniciada', () => {
+    const service: UserService = TestBed.get(UserService);
+    service.removeToken();
+    expect(service.getToken() === null);
   });
 });

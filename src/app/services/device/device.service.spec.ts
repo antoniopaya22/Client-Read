@@ -22,12 +22,12 @@ describe('DeviceService', () => {
         });
       }));
 
-  it('should be created', () => {
+  it('Crear componente', () => {
     const service: DeviceService = TestBed.get(DeviceService);
     expect(service).toBeTruthy();
   });
 
-  it('should get all data', () => {
+  it('Obtener todos los datos', () => {
     const service: DeviceService = TestBed.get(DeviceService);
     service.getAllData().subscribe(res => {
         expect(Object.keys(res).length).toBeGreaterThanOrEqual(0);
@@ -36,49 +36,13 @@ describe('DeviceService', () => {
     });
   });
 
-  it('should get latest data', () => {
+  it('Obtener un dato dado su id', () => {
     const service: DeviceService = TestBed.get(DeviceService);
-    service.getLatestData().subscribe(res => {
+    service.getByID('ID_AS5').subscribe(res => {
         expect(Object.keys(res).length).toBeGreaterThanOrEqual(0);
     } , err => {
         fail(err);
     });
   });
 
-  it('should get history data', () => {
-    const service: DeviceService = TestBed.get(DeviceService);
-    service.getHistoryData('ID_PRUEBA_0').subscribe(res => {
-        expect(Object.keys(res).length).toBeGreaterThanOrEqual(0);
-    } , err => {
-        fail(err);
-    });
-  });
-
-  it('should get dataByNode', () => {
-    const service: DeviceService = TestBed.get(DeviceService);
-    service.getByNodo('peer0.asturias.antonio.com').subscribe(res => {
-        expect(Object.keys(res).length).toBeGreaterThanOrEqual(0);
-        for (const key in res) {
-            if(key !== undefined) {
-                expect(res[key].Record.node == 'peer0.asturias.antonio.com');
-            }
-        }
-    } , err => {
-        fail(err);
-    });
-  });
-
-  it('should get data by device', () => {
-    const service: DeviceService = TestBed.get(DeviceService);
-    service.getByDevice('asturias_device').subscribe(res => {
-        expect(Object.keys(res).length).toBeGreaterThanOrEqual(0);
-        for (const key in res) {
-            if(key !== undefined) {
-                expect(res[key].Record.device == 'asturias_device');
-            }
-        }
-    } , err => {
-        fail(err);
-    });
-  });
 });
