@@ -1209,7 +1209,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "environment", function() { return environment; });
 var environment = {
     production: false,
-    api: 'http://156.35.163.141:3000'
+    api: 'http://156.35.163.142:3000'
 };
 
 
