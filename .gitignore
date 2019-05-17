@@ -24,7 +24,6 @@
 /libpeerconnection.log
 npm-debug.log
 testem.log
-/typings
 
 # e2e
 /e2e/*.js
@@ -33,26 +32,6 @@ testem.log
 #System Files
 .DS_Store
 
-### Ionic3 ###
-# Log an tmp data
-*~
-*.sw[mnpcod]
-*.log
-*.tmp
-*.tmp.*
-log.txt
-
-# NPM (Node Package Manager) files
-npm-debug.log*
-node_modules/
-tmp/
-temp/
-
-# Preprocessors cache files
-.sourcemaps/
-.sass-cache/
-.tmp/
-hooks/
 
 # Ionic 3 plugins files
 platforms/
