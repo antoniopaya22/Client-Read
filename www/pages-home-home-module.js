@@ -4501,7 +4501,7 @@ return Chartist;
 /***/ (function(module, exports, __webpack_require__) {
 
 /* @preserve
- * Leaflet 1.4.0, a JS library for interactive maps. http://leafletjs.com
+ * Leaflet 1.5.1+build.2e3e0ff, a JS library for interactive maps. http://leafletjs.com
  * (c) 2010-2018 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
@@ -4510,7 +4510,7 @@ return Chartist;
 	undefined;
 }(this, (function (exports) { 'use strict';
 
-var version = "1.4.0";
+var version = "1.5.1+build.2e3e0ffb";
 
 /*
  * @namespace Util
@@ -4628,8 +4628,8 @@ function falseFn() { return false; }
 // @function formatNum(num: Number, digits?: Number): Number
 // Returns the number `num` rounded to `digits` decimals, or to 6 decimals by default.
 function formatNum(num, digits) {
-	var pow = Math.pow(10, (digits === undefined ? 6 : digits));
-	return Math.round(num * pow) / pow;
+	digits = (digits === undefined ? 6 : digits);
+	return +(Math.round(num + ('e+' + digits)) + ('e-' + digits));
 }
 
 // @function trim(str: String): String
@@ -4969,7 +4969,7 @@ var Events = {
 	 *
 	 * @alternative
 	 * @method off: this
-	 * Removes all listeners to all events on the object.
+	 * Removes all listeners to all events on the object. This includes implicitly attached events.
 	 */
 	off: function (types, fn, context) {
 
@@ -6149,9 +6149,11 @@ var Earth = extend({}, CRS, {
  * a sphere. Used by the `EPSG:3857` CRS.
  */
 
+var earthRadius = 6378137;
+
 var SphericalMercator = {
 
-	R: 6378137,
+	R: earthRadius,
 	MAX_LATITUDE: 85.0511287798,
 
 	project: function (latlng) {
@@ -6174,7 +6176,7 @@ var SphericalMercator = {
 	},
 
 	bounds: (function () {
-		var d = 6378137 * Math.PI;
+		var d = earthRadius * Math.PI;
 		return new Bounds([-d, -d], [d, d]);
 	})()
 };
@@ -6672,6 +6674,7 @@ function addDoubleTapListener(obj, handler, id) {
 				touch$$1 = newTouch;
 			}
 			touch$$1.type = 'dblclick';
+			touch$$1.button = 0;
 			handler(touch$$1);
 			last = null;
 		}
@@ -8809,9 +8812,15 @@ var Map = Evented.extend({
 		// this event. Also fired on mobile when the user holds a single touch
 		// for a second (also called long press).
 		// @event keypress: KeyboardEvent
-		// Fired when the user presses a key from the keyboard while the map is focused.
+		// Fired when the user presses a key from the keyboard that produces a character value while the map is focused.
+		// @event keydown: KeyboardEvent
+		// Fired when the user presses a key from the keyboard while the map is focused. Unlike the `keypress` event,
+		// the `keydown` event is fired for keys that produce a character value and for keys
+		// that do not produce a character value.
+		// @event keyup: KeyboardEvent
+		// Fired when the user releases a key from the keyboard while the map is focused.
 		onOff(this._container, 'click dblclick mousedown mouseup ' +
-			'mouseover mouseout mousemove contextmenu keypress', this._handleDOMEvent, this);
+			'mouseover mouseout mousemove contextmenu keypress keydown keyup', this._handleDOMEvent, this);
 
 		if (this.options.trackResize) {
 			onOff(window, 'resize', this._onResize, this);
@@ -8875,7 +8884,7 @@ var Map = Evented.extend({
 
 		var type = e.type;
 
-		if (type === 'mousedown' || type === 'keypress') {
+		if (type === 'mousedown' || type === 'keypress' || type === 'keyup' || type === 'keydown') {
 			// prevents outline when clicking on keyboard-focusable element
 			preventOutline(e.target || e.srcElement);
 		}
@@ -8914,7 +8923,7 @@ var Map = Evented.extend({
 			originalEvent: e
 		};
 
-		if (e.type !== 'keypress') {
+		if (e.type !== 'keypress' && e.type !== 'keydown' && e.type !== 'keyup') {
 			var isMarker = target.getLatLng && (!target._radius || target._radius <= 10);
 			data.containerPoint = isMarker ?
 				this.latLngToContainerPoint(target.getLatLng()) : this.mouseEventToContainerPoint(e);
@@ -9167,7 +9176,7 @@ var Map = Evented.extend({
 		}
 
 		// @event zoomanim: ZoomAnimEvent
-		// Fired at least once per zoom animation. For continous zoom, like pinch zooming, fired once per frame during zoom.
+		// Fired at least once per zoom animation. For continuous zoom, like pinch zooming, fired once per frame during zoom.
 		this.fire('zoomanim', {
 			center: center,
 			zoom: zoom,
@@ -9285,6 +9294,8 @@ var Control = Class.extend({
 			corner.appendChild(container);
 		}
 
+		this._map.on('unload', this.remove, this);
+
 		return this;
 	},
 
@@ -9301,6 +9312,7 @@ var Control = Class.extend({
 			this.onRemove(this._map);
 		}
 
+		this._map.off('unload', this.remove, this);
 		this._map = null;
 
 		return this;
@@ -9698,7 +9710,7 @@ var Layers = Control.extend({
 			input.className = 'leaflet-control-layers-selector';
 			input.defaultChecked = checked;
 		} else {
-			input = this._createRadioElement('leaflet-base-layers', checked);
+			input = this._createRadioElement('leaflet-base-layers_' + stamp(this), checked);
 		}
 
 		this._layerControlInputs.push(input);
@@ -10083,7 +10095,7 @@ var Attribution = Control.extend({
 
 		// @option prefix: String = 'Leaflet'
 		// The HTML text shown before the attributions. Pass `false` to disable.
-		prefix: '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
+		prefix: '<a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
 	},
 
 	initialize: function (options) {
@@ -10828,7 +10840,7 @@ var LonLat = {
  * @namespace Projection
  * @projection L.Projection.Mercator
  *
- * Elliptical Mercator projection — more complex than Spherical Mercator. Takes into account that Earth is a geoid, not a perfect sphere. Used by the EPSG:3395 CRS.
+ * Elliptical Mercator projection — more complex than Spherical Mercator. Assumes that Earth is an ellipsoid. Used by the EPSG:3395 CRS.
  */
 
 var Mercator = {
@@ -10988,7 +11000,7 @@ CRS.Simple = Simple;
  * @example
  *
  * ```js
- * var layer = L.Marker(latlng).addTo(map);
+ * var layer = L.marker(latlng).addTo(map);
  * layer.addTo(map);
  * layer.remove();
  * ```
@@ -11919,6 +11931,10 @@ var Marker = Layer.extend({
 		// `Map pane` where the markers icon will be added.
 		pane: 'markerPane',
 
+		// @option pane: String = 'shadowPane'
+		// `Map pane` where the markers shadow will be added.
+		shadowPane: 'shadowPane',
+
 		// @option bubblingMouseEvents: Boolean = false
 		// When `true`, a mouse event on this marker will trigger the same event on the map
 		// (unless [`L.DomEvent.stopPropagation`](#domevent-stoppropagation) is used).
@@ -12009,6 +12025,12 @@ var Marker = Layer.extend({
 	setZIndexOffset: function (offset) {
 		this.options.zIndexOffset = offset;
 		return this.update();
+	},
+
+	// @method getIcon: Icon
+	// Returns the current icon used by the marker
+	getIcon: function () {
+		return this.options.icon;
 	},
 
 	// @method setIcon(icon: Icon): this
@@ -12106,7 +12128,7 @@ var Marker = Layer.extend({
 		}
 		this._initInteraction();
 		if (newShadow && addShadow) {
-			this.getPane('shadowPane').appendChild(this._shadow);
+			this.getPane(options.shadowPane).appendChild(this._shadow);
 		}
 	},
 
@@ -12190,7 +12212,9 @@ var Marker = Layer.extend({
 	_updateOpacity: function () {
 		var opacity = this.options.opacity;
 
-		setOpacity(this._icon, opacity);
+		if (this._icon) {
+			setOpacity(this._icon, opacity);
+		}
 
 		if (this._shadow) {
 			setOpacity(this._shadow, opacity);
@@ -12327,6 +12351,9 @@ var Path = Layer.extend({
 		setOptions(this, style);
 		if (this._renderer) {
 			this._renderer._updateStyle(this);
+			if (this.options.stroke && style.hasOwnProperty('weight')) {
+				this._updateBounds();
+			}
 		}
 		return this;
 	},
@@ -12768,14 +12795,19 @@ var Polyline = Path.extend({
 		this._rings = [];
 		this._projectLatlngs(this._latlngs, this._rings, pxBounds);
 
+		if (this._bounds.isValid() && pxBounds.isValid()) {
+			this._rawPxBounds = pxBounds;
+			this._updateBounds();
+		}
+	},
+
+	_updateBounds: function () {
 		var w = this._clickTolerance(),
 		    p = new Point(w, w);
-
-		if (this._bounds.isValid() && pxBounds.isValid()) {
-			pxBounds.min._subtract(p);
-			pxBounds.max._add(p);
-			this._pxBounds = pxBounds;
-		}
+		this._pxBounds = new Bounds([
+			this._rawPxBounds.min.subtract(p),
+			this._rawPxBounds.max.add(p)
+		]);
 	},
 
 	// recursively turns latlngs into a set of rings with projected coordinates
@@ -13205,10 +13237,10 @@ var GeoJSON = FeatureGroup.extend({
 	},
 
 	_setLayerStyle: function (layer, style) {
-		if (typeof style === 'function') {
-			style = style(layer.feature);
-		}
 		if (layer.setStyle) {
+			if (typeof style === 'function') {
+				style = style(layer.feature);
+			}
 			layer.setStyle(style);
 		}
 	}
@@ -13358,19 +13390,25 @@ var PointToGeoJSON = {
 };
 
 // @namespace Marker
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the marker (as a GeoJSON `Point` Feature).
 Marker.include(PointToGeoJSON);
 
 // @namespace CircleMarker
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the circle marker (as a GeoJSON `Point` Feature).
 Circle.include(PointToGeoJSON);
 CircleMarker.include(PointToGeoJSON);
 
 
 // @namespace Polyline
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the polyline (as a GeoJSON `LineString` or `MultiLineString` Feature).
 Polyline.include({
 	toGeoJSON: function (precision) {
@@ -13386,7 +13424,9 @@ Polyline.include({
 });
 
 // @namespace Polygon
-// @method toGeoJSON(): Object
+// @method toGeoJSON(precision?: Number): Object
+// `precision` is the number of decimal places for coordinates.
+// The default value is 6 places.
 // Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the polygon (as a GeoJSON `Polygon` or `MultiPolygon` Feature).
 Polygon.include({
 	toGeoJSON: function (precision) {
@@ -13422,7 +13462,9 @@ LayerGroup.include({
 		});
 	},
 
-	// @method toGeoJSON(): Object
+	// @method toGeoJSON(precision?: Number): Object
+	// `precision` is the number of decimal places for coordinates.
+	// The default value is 6 places.
 	// Returns a [`GeoJSON`](http://en.wikipedia.org/wiki/GeoJSON) representation of the layer group (as a GeoJSON `FeatureCollection`, `GeometryCollection`, or `MultiPoint`).
 	toGeoJSON: function (precision) {
 
@@ -13767,7 +13809,12 @@ var VideoOverlay = ImageOverlay.extend({
 
 		// @option loop: Boolean = true
 		// Whether the video will loop back to the beginning when played.
-		loop: true
+		loop: true,
+
+		// @option keepAspectRatio: Boolean = true
+		// Whether the video will save aspect ratio after the projection.
+		// Relevant for supported browsers. Browser compatibility- https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+		keepAspectRatio: true
 	},
 
 	_initImage: function () {
@@ -13797,6 +13844,7 @@ var VideoOverlay = ImageOverlay.extend({
 
 		if (!isArray(this._url)) { this._url = [this._url]; }
 
+		if (!this.options.keepAspectRatio && vid.style.hasOwnProperty('objectFit')) { vid.style['objectFit'] = 'fill'; }
 		vid.autoplay = !!this.options.autoplay;
 		vid.loop = !!this.options.loop;
 		for (var i = 0; i < this._url.length; i++) {
@@ -13818,6 +13866,49 @@ var VideoOverlay = ImageOverlay.extend({
 
 function videoOverlay(video, bounds, options) {
 	return new VideoOverlay(video, bounds, options);
+}
+
+/*
+ * @class SVGOverlay
+ * @aka L.SVGOverlay
+ * @inherits ImageOverlay
+ *
+ * Used to load, display and provide DOM access to an SVG file over specific bounds of the map. Extends `ImageOverlay`.
+ *
+ * An SVG overlay uses the [`<svg>`](https://developer.mozilla.org/docs/Web/SVG/Element/svg) element.
+ *
+ * @example
+ *
+ * ```js
+ * var element = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image xlink:href="https://mdn.mozillademos.org/files/6457/mdn_logo_only_color.png" height="200" width="200"/></svg>',
+ * 		 elementBounds = [ [ 32, -130 ], [ 13, -100 ] ];
+ * L.svgOverlay(element, elementBounds).addTo(map);
+ * ```
+ */
+
+var SVGOverlay = ImageOverlay.extend({
+	_initImage: function () {
+		var el = this._image = this._url;
+
+		addClass(el, 'leaflet-image-layer');
+		if (this._zoomAnimated) { addClass(el, 'leaflet-zoom-animated'); }
+
+		el.onselectstart = falseFn;
+		el.onmousemove = falseFn;
+	}
+
+	// @method getElement(): SVGElement
+	// Returns the instance of [`SVGElement`](https://developer.mozilla.org/docs/Web/API/SVGElement)
+	// used by this overlay.
+});
+
+
+// @factory L.svgOverlay(svg: String|SVGElement, bounds: LatLngBounds, options?: SVGOverlay options)
+// Instantiates an image overlay object given an SVG element and the geographical bounds it is tied to.
+// A viewBox attribute is required on the SVG element to zoom in and out properly.
+
+function svgOverlay(el, bounds, options) {
+	return new SVGOverlay(el, bounds, options);
 }
 
 /*
@@ -13972,6 +14063,38 @@ var DivOverlay = Layer.extend({
 			toBack(this._container);
 		}
 		return this;
+	},
+
+	_prepareOpen: function (parent, layer, latlng) {
+		if (!(layer instanceof Layer)) {
+			latlng = layer;
+			layer = parent;
+		}
+
+		if (layer instanceof FeatureGroup) {
+			for (var id in parent._layers) {
+				layer = parent._layers[id];
+				break;
+			}
+		}
+
+		if (!latlng) {
+			if (layer.getCenter) {
+				latlng = layer.getCenter();
+			} else if (layer.getLatLng) {
+				latlng = layer.getLatLng();
+			} else {
+				throw new Error('Unable to get source layer LatLng.');
+			}
+		}
+
+		// set overlay source to this layer
+		this._source = layer;
+
+		// update the overlay (content, layout, ect...)
+		this.update();
+
+		return latlng;
 	},
 
 	_updateContent: function () {
@@ -14428,28 +14551,8 @@ Layer.include({
 	// @method openPopup(latlng?: LatLng): this
 	// Opens the bound popup at the specified `latlng` or at the default popup anchor if no `latlng` is passed.
 	openPopup: function (layer, latlng) {
-		if (!(layer instanceof Layer)) {
-			latlng = layer;
-			layer = this;
-		}
-
-		if (layer instanceof FeatureGroup) {
-			for (var id in this._layers) {
-				layer = this._layers[id];
-				break;
-			}
-		}
-
-		if (!latlng) {
-			latlng = layer.getCenter ? layer.getCenter() : layer.getLatLng();
-		}
-
 		if (this._popup && this._map) {
-			// set popup source to this layer
-			this._popup._source = layer;
-
-			// update the popup (content, layout, ect...)
-			this._popup.update();
+			latlng = this._popup._prepareOpen(this, layer, latlng);
 
 			// open the popup on the map
 			this._map.openPopup(this._popup, latlng);
@@ -14846,29 +14949,8 @@ Layer.include({
 	// @method openTooltip(latlng?: LatLng): this
 	// Opens the bound tooltip at the specified `latlng` or at the default tooltip anchor if no `latlng` is passed.
 	openTooltip: function (layer, latlng) {
-		if (!(layer instanceof Layer)) {
-			latlng = layer;
-			layer = this;
-		}
-
-		if (layer instanceof FeatureGroup) {
-			for (var id in this._layers) {
-				layer = this._layers[id];
-				break;
-			}
-		}
-
-		if (!latlng) {
-			latlng = layer.getCenter ? layer.getCenter() : layer.getLatLng();
-		}
-
 		if (this._tooltip && this._map) {
-
-			// set tooltip source to this layer
-			this._tooltip._source = layer;
-
-			// update the tooltip (content, layout, ect...)
-			this._tooltip.update();
+			latlng = this._tooltip._prepareOpen(this, layer, latlng);
 
 			// open the tooltip on the map
 			this._map.openTooltip(this._tooltip, latlng);
@@ -14979,8 +15061,9 @@ var DivIcon = Icon.extend({
 		// iconAnchor: (Point),
 		// popupAnchor: (Point),
 
-		// @option html: String = ''
-		// Custom HTML code to put inside the div element, empty by default.
+		// @option html: String|HTMLElement = ''
+		// Custom HTML code to put inside the div element, empty by default. Alternatively,
+		// an instance of `HTMLElement`.
 		html: false,
 
 		// @option bgPos: Point = [0, 0]
@@ -14994,7 +15077,12 @@ var DivIcon = Icon.extend({
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
 		    options = this.options;
 
-		div.innerHTML = options.html !== false ? options.html : '';
+		if (options.html instanceof Element) {
+			empty(div);
+			div.appendChild(options.html);
+		} else {
+			div.innerHTML = options.html !== false ? options.html : '';
+		}
 
 		if (options.bgPos) {
 			var bgPos = toPoint(options.bgPos);
@@ -18384,6 +18472,8 @@ exports.ImageOverlay = ImageOverlay;
 exports.imageOverlay = imageOverlay;
 exports.VideoOverlay = VideoOverlay;
 exports.videoOverlay = videoOverlay;
+exports.SVGOverlay = SVGOverlay;
+exports.svgOverlay = svgOverlay;
 exports.DivOverlay = DivOverlay;
 exports.Popup = Popup;
 exports.popup = popup;
@@ -18493,7 +18583,7 @@ var HomePageModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<ion-header>\r\n  <ion-toolbar>\r\n    <ion-buttons slot=\"start\">\r\n      <ion-menu-button></ion-menu-button>\r\n    </ion-buttons>\r\n    <ion-title>\r\n      Home\r\n    </ion-title>\r\n    <!--\r\n    <ion-buttons slot=\"secondary\" *ngIf=\"!esMovil()\">\r\n      <ion-input placeholder=\"Buscar...\"></ion-input>\r\n      <ion-button>\r\n        <ion-icon slot=\"icon-only\" name=\"search\"></ion-icon>\r\n      </ion-button>\r\n    </ion-buttons>\r\n    -->\r\n  </ion-toolbar>\r\n</ion-header>\r\n\r\n<ion-content>\r\n    <ion-grid>\r\n        <ion-row>\r\n          <ion-col size=\"12\">\r\n              <div class=\"card card-chart\">\r\n                  <div class=\"card-header card-header-orange\">\r\n                      <div class=\"ct-chart\" id=\"dailySalesChart\"></div>\r\n                  </div>\r\n                  <div class=\"card-body\">\r\n                      <h4 class=\"card-title\">Temperatura del device</h4>\r\n                      <p class=\"card-category\" *ngIf=\"sube\">\r\n                          <span class=\"text-success\" ><i class=\"fa fa-long-arrow-up\"></i> {{subida}}% </span> de subida\r\n                      </p>\r\n                       <p class=\"card-category\" *ngIf=\"!sube\">\r\n                          <span class=\"text-danger\"><i class=\"fa fa-long-arrow-down\"></i> {{subida}}% </span> de bajada\r\n                      </p>\r\n                      \r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n        </ion-row>\r\n        <ion-row>\r\n            <div class=\"card card-chart\">\r\n                  <div class=\"card-header card-header-orange\">\r\n                      <h4 class=\"card-title\">Mapa de devices</h4>\r\n                  </div>\r\n                  <div class=\"card-body\">\r\n                      <div id=\"map\" class=\"map\"></div>\r\n                  </div>\r\n              </div>\r\n         </ion-row>\r\n    </ion-grid>\r\n    <ion-footer>\r\n  <ion-toolbar>\r\n    © Copyright Antonio Payá González 2019\r\n  </ion-toolbar>\r\n</ion-footer>\r\n</ion-content>"
+module.exports = "<ion-header>\r\n  <ion-toolbar>\r\n    <ion-buttons slot=\"start\">\r\n      <ion-menu-button></ion-menu-button>\r\n    </ion-buttons>\r\n    <ion-title>\r\n      Home\r\n    </ion-title>\r\n    <!--\r\n    <ion-buttons slot=\"secondary\" *ngIf=\"!esMovil()\">\r\n      <ion-input placeholder=\"Buscar...\"></ion-input>\r\n      <ion-button>\r\n        <ion-icon slot=\"icon-only\" name=\"search\"></ion-icon>\r\n      </ion-button>\r\n    </ion-buttons>\r\n    -->\r\n  </ion-toolbar>\r\n</ion-header>\r\n\r\n<ion-content>\r\n    <ion-grid>\r\n        <ion-row>\r\n          <ion-col size=\"12\" size-sm>\r\n              <div class=\"card card-stats\">\r\n                  <div class=\"card-header card-header-warning card-header-icon\">\r\n                      <div class=\"card-icon\">\r\n                          <i class=\"material-icons\">dns</i>\r\n                      </div>\r\n                      <p class=\"card-category\">Número de nodos</p>\r\n                      <h3 class=\"card-title\">3</h3>\r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n          <ion-col size=\"12\" size-sm>\r\n              <div class=\"card card-stats\">\r\n                  <div class=\"card-header card-header-success card-header-icon\">\r\n                      <div class=\"card-icon\">\r\n                          <i class=\"material-icons\">memory</i>\r\n                      </div>\r\n                      <p class=\"card-category\">Número de devices</p>\r\n                      <h3 class=\"card-title\">{{ devices.length }}</h3>\r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n          <ion-col size=\"12\" size-sm>\r\n              <div class=\"card card-stats\">\r\n                  <div class=\"card-header card-header-danger card-header-icon\">\r\n                      <div class=\"card-icon\">\r\n                          <i class=\"material-icons\">trending_up</i>\r\n                      </div>\r\n                      <p class=\"card-category\">Devices con temperatura alta</p>\r\n                      <h3 class=\"card-title\">1</h3>\r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n          <ion-col size=\"12\" size-sm>\r\n              <div class=\"card card-stats\">\r\n                  <div class=\"card-header card-header-info card-header-icon\">\r\n                      <div class=\"card-icon\">\r\n                          <i class=\"material-icons\">trending_down</i>\r\n                      </div>\r\n                      <p class=\"card-category\">Devices con temperatura baja</p>\r\n                      <h3 class=\"card-title\">2</h3>\r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n        </ion-row>\r\n        <ion-row>\r\n          <ion-col size=\"12\">\r\n              <div class=\"card card-chart\">\r\n                  <div class=\"card-header card-header-orange\">\r\n                      <div class=\"ct-chart\" id=\"dailySalesChart\"></div>\r\n                  </div>\r\n                  <div class=\"card-body\">\r\n                      <h4 class=\"card-title\">Temperatura del device</h4>\r\n                      <ion-item>\r\n                        <ion-label>Seleccionar device a mostrar</ion-label>\r\n                        <ion-select (ionChange)=\"onSelectChange($event)\">\r\n                          <ion-select-option *ngFor=\"let device of devices\">{{device}}</ion-select-option>\r\n                        </ion-select>\r\n                      </ion-item>\r\n                      <p class=\"card-category\" *ngIf=\"sube\">\r\n                          <span class=\"text-success\" ><i class=\"fa fa-long-arrow-up\"></i> {{subida}}% </span> de subida\r\n                      </p>\r\n                       <p class=\"card-category\" *ngIf=\"!sube\">\r\n                          <span class=\"text-danger\"><i class=\"fa fa-long-arrow-down\"></i> {{subida}}% </span> de bajada\r\n                      </p>\r\n                      \r\n                  </div>\r\n                  <div class=\"card-footer\">\r\n                      <div class=\"stats\">\r\n                          <i class=\"material-icons\">update</i> Just Updated\r\n                      </div>\r\n                  </div>\r\n              </div>\r\n          </ion-col>\r\n        </ion-row>\r\n        <ion-row>\r\n            <div class=\"card card-chart\">\r\n                  <div class=\"card-header card-header-orange\">\r\n                      <h4 class=\"card-title\">Mapa de devices</h4>\r\n                  </div>\r\n                  <div class=\"card-body\">\r\n                      <div id=\"map\" class=\"map\"></div>\r\n                  </div>\r\n              </div>\r\n         </ion-row>\r\n    </ion-grid>\r\n    <ion-footer>\r\n  <ion-toolbar>\r\n    © Copyright Antonio Payá González 2019\r\n  </ion-toolbar>\r\n</ion-footer>\r\n</ion-content>"
 
 /***/ }),
 
@@ -18504,7 +18594,7 @@ module.exports = "<ion-header>\r\n  <ion-toolbar>\r\n    <ion-buttons slot=\"sta
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".map {\n  margin-bottom: 2%;\n  margin-top: -4%; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvcGFnZXMvaG9tZS9DOlxcVXNlcnNcXGFudG9uXFxEZXNrdG9wXFxURkdcXFJlcG9zXFxDbGllbnQtUmVhZC9zcmNcXGFwcFxccGFnZXNcXGhvbWVcXGhvbWUucGFnZS5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0ksaUJBQWdCO0VBQ2hCLGVBQWUsRUFBQSIsImZpbGUiOiJzcmMvYXBwL3BhZ2VzL2hvbWUvaG9tZS5wYWdlLnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubWFwe1xyXG4gICAgbWFyZ2luLWJvdHRvbToyJTtcclxuICAgIG1hcmdpbi10b3A6IC00JTtcclxufVxyXG5cclxuIl19 */"
+module.exports = ".map {\n  margin-bottom: 2%;\n  margin-top: -4%; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvcGFnZXMvaG9tZS9DOlxcVXNlcnNcXGFudG9uXFxEZXNrdG9wXFxURkdcXFBsYW50aWxsYXNcXENsaWVudC1BdWRpdG9yeS9zcmNcXGFwcFxccGFnZXNcXGhvbWVcXGhvbWUucGFnZS5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0ksaUJBQWdCO0VBQ2hCLGVBQWUsRUFBQSIsImZpbGUiOiJzcmMvYXBwL3BhZ2VzL2hvbWUvaG9tZS5wYWdlLnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubWFwe1xyXG4gICAgbWFyZ2luLWJvdHRvbToyJTtcclxuICAgIG1hcmdpbi10b3A6IC00JTtcclxufVxyXG5cclxuIl19 */"
 
 /***/ }),
 
@@ -18537,15 +18627,15 @@ var HomePage = /** @class */ (function () {
         this.devicedata = devicedata;
         this.platform = platform;
         this.chart = [];
-        this.device = "";
+        this.devices = [];
     }
     HomePage.prototype.ionViewDidEnter = function () {
         this.greenIcon = leaflet__WEBPACK_IMPORTED_MODULE_3___default.a.icon({
             iconUrl: '../../assets/icon/marker-icon.png',
             shadowUrl: '../../assets/icon/marker-shadow.png',
         });
-        this.tempData();
         this.loadData();
+        this.tempData("asturias_device");
     };
     HomePage.prototype.startAnimationForLineChart = function (chart) {
         var seq, delays, durations;
@@ -18580,6 +18670,16 @@ var HomePage = /** @class */ (function () {
         seq = 0;
     };
     ;
+    HomePage.prototype.loadData = function () {
+        var _this = this;
+        this.devices = [];
+        this.devicedata.getLatestData().subscribe(function (res) {
+            for (var key in res) {
+                _this.devices.push(key);
+            }
+            _this.loadmap(res);
+        });
+    };
     HomePage.prototype.loadmap = function (res) {
         this.map = leaflet__WEBPACK_IMPORTED_MODULE_3___default.a.map('map').fitWorld().zoomIn();
         leaflet__WEBPACK_IMPORTED_MODULE_3___default.a.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -18588,21 +18688,21 @@ var HomePage = /** @class */ (function () {
         }).addTo(this.map);
         for (var key in res) {
             if (res.hasOwnProperty(key)) {
-                var long = res[key]['gps'].split(';')[0];
-                var lat = res[key]['gps'].split(';')[1];
+                var long = res[key]['Record']['gps'].split(';')[0];
+                var lat = res[key]['Record']['gps'].split(';')[1];
                 //leaflet.marker([43.365912, -5.852597], { icon: this.greenIcon }).addTo(this.map);
                 leaflet__WEBPACK_IMPORTED_MODULE_3___default.a.marker([lat, long], { icon: this.greenIcon }).addTo(this.map);
             }
         }
     };
-    HomePage.prototype.tempData = function () {
+    HomePage.prototype.tempData = function (device) {
         var _this = this;
-        this.devicedata.getAllData().subscribe(function (result) {
+        this.devicedata.getByDevice(device).subscribe(function (result) {
             var data = [];
             var date = [];
             Object.keys(result).some(function (key) {
-                data.push(result[key]['temperature']);
-                var tempDate = new Date(parseInt(result[key]['hour']));
+                data.push(result[key]['Record']['temperature']);
+                var tempDate = new Date(parseInt(result[key]['Record']['hour']));
                 date.push(tempDate.toLocaleDateString());
                 return data.length >= 5;
             });
@@ -18626,19 +18726,8 @@ var HomePage = /** @class */ (function () {
             _this.startAnimationForLineChart(dailySalesChart);
         });
     };
-    HomePage.prototype.loadData = function () {
-        var _this = this;
-        this.devicedata.getAllData().subscribe(function (result) {
-            var dato = {};
-            for (var i in Object.keys(result)) {
-                var x = result[i];
-                if (dato[x.device] == undefined)
-                    dato[x.device] = x;
-                else if (dato[x.device] != undefined && parseInt(x.id.match(/\d+/)[0]) > parseInt(dato[x.device].id.match(/\d+/)[0]))
-                    dato[x.device] = x;
-            }
-            _this.loadmap(dato);
-        });
+    HomePage.prototype.onSelectChange = function (selectedValue) {
+        this.tempData(selectedValue.detail.value);
     };
     HomePage = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_2__["Component"])({
