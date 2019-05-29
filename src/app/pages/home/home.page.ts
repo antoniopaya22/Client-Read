@@ -4,6 +4,9 @@ import leaflet from 'leaflet';
 import { Platform } from '@ionic/angular';
 import * as Chartist from 'chartist';
 
+/**
+ * Home page
+ */
 @Component({
     selector: 'app-home',
     templateUrl: 'home.page.html',
@@ -19,10 +22,18 @@ export class HomePage {
 
     public device = "";
 
+    /**
+     * Constructor
+     * @param {DeviceService} deviceApi
+     * @param {Platform} platform
+     */
     constructor(
         private devicedata: DeviceService,
         private platform: Platform) { }
 
+    /**
+     * OnInit
+     */
     ionViewDidEnter() {
         this.greenIcon = leaflet.icon({
             iconUrl: '../../assets/icon/marker-icon.png',
@@ -32,6 +43,10 @@ export class HomePage {
         this.loadData();
     }
 
+    /**
+     * Comienza la animacion de la grafica
+     * @param char, grafica
+     */
     startAnimationForLineChart(chart) {
         let seq: any, delays: any, durations: any;
         seq = 0;
@@ -65,6 +80,10 @@ export class HomePage {
         seq = 0;
     };
 
+    /**
+     * Carga el mapa con sus datos
+     * @param res
+     */
     loadmap(res) {
 
         this.map = leaflet.map('map').fitWorld().zoomIn();
@@ -86,6 +105,9 @@ export class HomePage {
     }
 
 
+    /**
+     * Carga los datos de un device
+     */
     tempData() {
         this.devicedata.getAllData().subscribe(result => {
 
@@ -123,6 +145,9 @@ export class HomePage {
 
     }
 
+    /**
+     * Carga los datos
+     */
     loadData() {
         this.devicedata.getAllData().subscribe(result => {
             var dato = {};

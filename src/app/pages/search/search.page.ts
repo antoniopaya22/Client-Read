@@ -5,6 +5,9 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatPaginator, MatTableDataSource } from '@angular/material';
 import { Router } from '@angular/router';
 
+/**
+ * Search page
+ */
 @Component({
     selector: 'app-search',
     templateUrl: './search.page.html',
@@ -20,8 +23,22 @@ export class SearchPage implements OnInit {
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
-    constructor(private formBuilder: FormBuilder, private service: DeviceService, private userApi: UserService, private router: Router) { }
+    /**
+     * Constructor
+     * @param {FormBuilder} formBuild
+     * @param {DeviceService} service
+     * @param {UserService} userApi
+     * @param {Router} router
+     */
+    constructor(
+        private formBuilder: FormBuilder,
+        private service: DeviceService,
+        private userApi: UserService,
+        private router: Router) { }
 
+    /**
+     * OnInit
+     */
     ngOnInit() {
         if (window.innerWidth > 760) {
             this.size = true;
@@ -31,6 +48,9 @@ export class SearchPage implements OnInit {
         });
     }
 
+    /**
+     * Search data
+     */
     search() {
         let id = this.filter.value['filterId'];
         this.service.getAllData().subscribe(res => {
@@ -57,6 +77,12 @@ export class SearchPage implements OnInit {
             });
     }
 
+    /**
+     * Comprobar dato por id
+     * @param dato
+     * @param id
+     * @return boolean
+     */
     comprobar(dato, id) : boolean{
         if ((id != undefined || id !== "") && dato.id === id) {
             return true;

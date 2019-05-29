@@ -7,7 +7,7 @@ const routes: Routes = [
   { path: 'home', loadChildren: './pages/home/home.module#HomePageModule', canActivate: [AuthGuard] },
   { path: 'login', loadChildren: './pages/login/login.module#LoginPageModule'},
   { path: 'search', loadChildren: './pages/search/search.module#SearchPageModule', canActivate: [AuthGuard] },
-  { path: 'alldata', loadChildren: './pages/alldata/alldata.module#AlldataPageModule', canActivate: [AuthGuard] },
+  { path: 'alldata', loadChildren: './pages/alldata/alldata.module#AlldataPageModule', canActivate: [AuthGuard] }
 ];
 
 @NgModule({
