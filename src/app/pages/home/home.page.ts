@@ -99,7 +99,7 @@ export class HomePage {
                 let lat = res[key]['gps'].split(';')[1];
 
                 //leaflet.marker([43.365912, -5.852597], { icon: this.greenIcon }).addTo(this.map);
-                leaflet.marker([lat, long], { icon: this.greenIcon }).addTo(this.map);
+                leaflet.marker([long, lat], { icon: this.greenIcon }).addTo(this.map);
             }
         }
     }
