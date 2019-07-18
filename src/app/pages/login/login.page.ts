@@ -69,7 +69,7 @@ export class LoginPage implements OnInit {
 
         this.userApi.login(data).subscribe(res => {
             let rol = jwt_decode(res).rol;
-            if (rol === "auditor") {
+            if (rol === "auditor" || "empleado_asturias") {
                 this.userApi.setToken(res);
                 this.menuCtrl.enable(true);
                 this.router.navigate(['/home'], { replaceUrl: true });
